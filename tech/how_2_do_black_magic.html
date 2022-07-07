@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>greysoh's blog full of lulz</title>
+
+    <link rel="stylesheet" href="/static/highlighting.css" />
+    <link rel="stylesheet" href="/static/fira/fira_code.css" />
+
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+  <body>
+    <div class="titlebar">
+      <a class="name" href="/">greysoh</a>
+
+      <div class="menuopts">
+        <a class="menuopt" href="/tech/TABLE_OF_CONTENTS.md">tech/</a>
+        <a class="menuopt" href="/rand/TABLE_OF_CONTENTS.md">rand/</a>
+      </div>
+    </div>
+
+    <br /><br />
+
+    <h3>How to do black magic (blogging made hard af) [7/7/22]</h3>
+    <p>First, you need to make 2 repositories:</p>
+    <ul>
+      <li>GitHub Pages (ex. greysoh.github.io)</li>
+      <li>Pages Source (ex. blog-maybe)</li>
+    </ul>
+    <p>Then, you need to add 2 secrets in the pages source repo:</p>
+    <ul>
+      <li>GitHub Token (look it up am lazy), as TOKEN</li>
+      <li>Your git email, as EMAIL</li>
+    </ul>
+    <p>
+      Then, proceed to get your last little bit of sanity, and copy and paste
+      all of this into <code>.github\workflows\build.yml</code>, in the pages
+      source repo:
+    </p>
+    <pre><code class="hljs"><span class="hljs-attr">name:</span> <span class="hljs-string">Build</span> <span class="hljs-string">repo</span>
+<span class="hljs-attr">on:</span> [<span class="hljs-string">push</span>]
+
+<span class="hljs-attr">jobs:</span>
+  <span class="hljs-attr">build:</span>
+    <span class="hljs-attr">runs-on:</span> <span class="hljs-string">ubuntu-latest</span>
+    <span class="hljs-attr">steps:</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-attr">uses:</span> <span class="hljs-string">actions/checkout@v3</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-attr">uses:</span> <span class="hljs-string">actions/setup-node@v3</span>
+        <span class="hljs-attr">with:</span>
+          <span class="hljs-attr">node-version:</span> <span class="hljs-number">18</span>
+
+      <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">Making</span> <span class="hljs-string">input</span> <span class="hljs-string">directory</span>
+        <span class="hljs-attr">run:</span> <span class="hljs-string">mkdir</span> <span class="hljs-string">/tmp/stuff</span>
+        
+      <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">Copying</span> <span class="hljs-string">files</span>
+        <span class="hljs-attr">run:</span> <span class="hljs-string">cp</span> <span class="hljs-string">-r</span> <span class="hljs-string">.</span> <span class="hljs-string">/tmp/stuff</span>
+
+      <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">Deleting</span> <span class="hljs-string">files</span>
+        <span class="hljs-attr">run:</span> <span class="hljs-string">rm</span> <span class="hljs-string">-rf</span> <span class="hljs-string">*</span> <span class="hljs-string">&amp;&amp;</span> <span class="hljs-string">rm</span> <span class="hljs-string">-rf</span> <span class="hljs-string">/tmp/stuff/.git*</span>
+
+      <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">Downloading</span> <span class="hljs-string">blogging</span> <span class="hljs-string">software...</span>
+        <span class="hljs-attr">run:</span> <span class="hljs-string">git</span> <span class="hljs-string">clone</span> <span class="hljs-string">https://github.com/greysoh/blog-gen.git</span>
+
+      <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">Installing</span> <span class="hljs-string">blogging</span> <span class="hljs-string">software...</span>
+        <span class="hljs-attr">run:</span> <span class="hljs-string">cd</span> <span class="hljs-string">blog-gen</span> <span class="hljs-string">&amp;&amp;</span> <span class="hljs-string">npm</span> <span class="hljs-string">install</span>
+
+      <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">Running</span> <span class="hljs-string">blogging</span> <span class="hljs-string">software...</span>
+        <span class="hljs-attr">run:</span> <span class="hljs-string">cd</span> <span class="hljs-string">blog-gen</span> <span class="hljs-string">&amp;&amp;</span> <span class="hljs-string">cp</span> <span class="hljs-string">-r</span> <span class="hljs-string">/tmp/stuff</span> <span class="hljs-string">in</span> <span class="hljs-string">&amp;&amp;</span> <span class="hljs-string">npm</span> <span class="hljs-string">start</span>
+
+      <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">Listing</span> <span class="hljs-string">files</span> <span class="hljs-string">(for</span> <span class="hljs-string">debugging)</span>
+        <span class="hljs-attr">run:</span> <span class="hljs-string">cd</span> <span class="hljs-string">blog-gen</span> <span class="hljs-string">&amp;&amp;</span> <span class="hljs-string">ls</span> <span class="hljs-string">out</span>
+
+      <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">Downloading</span> <span class="hljs-string">blog...</span>
+        <span class="hljs-attr">run:</span> <span class="hljs-string">git</span> <span class="hljs-string">clone</span> <span class="hljs-string">https://github.com/user/github-pages.git</span> <span class="hljs-string">pages</span>
+      
+      <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">Deleting</span> <span class="hljs-string">existing</span> <span class="hljs-string">files...</span>
+        <span class="hljs-attr">run:</span> <span class="hljs-string">mv</span> <span class="hljs-string">pages/CNAME</span> <span class="hljs-string">.</span> <span class="hljs-string">&amp;&amp;</span> <span class="hljs-string">rm</span> <span class="hljs-string">-rf</span> <span class="hljs-string">pages/*</span> <span class="hljs-string">&amp;&amp;</span> <span class="hljs-string">mv</span> <span class="hljs-string">CNAME</span> <span class="hljs-string">pages/</span>
+      
+      <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">Copying</span> <span class="hljs-string">new</span> <span class="hljs-string">files...</span>
+        <span class="hljs-attr">run:</span> <span class="hljs-string">cp</span> <span class="hljs-string">-r</span> <span class="hljs-string">blog-gen/out/*</span> <span class="hljs-string">pages/</span>
+      
+      <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">Setting</span> <span class="hljs-string">config...</span>
+        <span class="hljs-attr">shell:</span> <span class="hljs-string">bash</span>
+        <span class="hljs-attr">env:</span> 
+          <span class="hljs-attr">EMAIL:</span> <span class="hljs-string">${{</span> <span class="hljs-string">secrets.EMAIL</span> <span class="hljs-string">}}</span>
+          <span class="hljs-attr">PASS:</span> <span class="hljs-string">${{</span> <span class="hljs-string">secrets.TOKEN</span> <span class="hljs-string">}}</span>
+        <span class="hljs-attr">run:</span> <span class="hljs-string">git</span> <span class="hljs-string">config</span> <span class="hljs-string">--global</span> <span class="hljs-string">user.name</span> <span class="hljs-string">&quot;user&quot;</span> <span class="hljs-string">&amp;&amp;</span> <span class="hljs-string">git</span> <span class="hljs-string">config</span> <span class="hljs-string">--global</span> <span class="hljs-string">user.email</span> <span class="hljs-string">&quot;$EMAIL&quot;</span>
+      
+      <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">Commiting</span> <span class="hljs-string">changes...</span>
+        <span class="hljs-attr">run:</span> <span class="hljs-string">cd</span> <span class="hljs-string">pages</span> <span class="hljs-string">&amp;&amp;</span> <span class="hljs-string">git</span> <span class="hljs-string">add</span> <span class="hljs-string">.</span> <span class="hljs-string">&amp;&amp;</span> <span class="hljs-string">git</span> <span class="hljs-string">commit</span> <span class="hljs-string">-m</span> <span class="hljs-string">&quot;Sync changes&quot;</span>
+
+      <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">Pushing</span> <span class="hljs-string">changes...</span>
+        <span class="hljs-attr">uses:</span> <span class="hljs-string">cpina/github-action-push-to-another-repository@main</span>
+        <span class="hljs-attr">env:</span>
+          <span class="hljs-attr">API_TOKEN_GITHUB:</span> <span class="hljs-string">${{</span> <span class="hljs-string">secrets.TOKEN</span> <span class="hljs-string">}}</span>
+        <span class="hljs-attr">with:</span>
+          <span class="hljs-attr">source-directory:</span> <span class="hljs-string">&#x27;pages&#x27;</span>
+          <span class="hljs-attr">destination-github-username:</span> <span class="hljs-string">&#x27;user&#x27;</span>
+          <span class="hljs-attr">destination-repository-name:</span> <span class="hljs-string">&#x27;github-pages&#x27;</span>
+          <span class="hljs-attr">user-email:</span> <span class="hljs-string">${{</span> <span class="hljs-string">secrets.EMAIL</span> <span class="hljs-string">}}</span>
+          <span class="hljs-attr">target-branch:</span> <span class="hljs-string">main</span>
+</code></pre>
+    <p>
+      Replace <code>user</code>, with your username, and
+      <code>github-pages</code>, with the github pages repository.
+    </p>
+    <p>
+      Then, make a file named <code>template.html</code>, in the root of the
+      pages source repo, and make something similar to this:
+    </p>
+    <pre><code class="hljs"><span class="hljs-meta">&lt;!DOCTYPE <span class="hljs-keyword">html</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">html</span> <span class="hljs-attr">lang</span>=<span class="hljs-string">&quot;en&quot;</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">head</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">title</span>&gt;</span>Epic Site<span class="hljs-tag">&lt;/<span class="hljs-name">title</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">head</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span>
+        Some markdown below:<span class="hljs-tag">&lt;<span class="hljs-name">br</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">br</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">md</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">md</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span>
+</code></pre>
+    <p>
+      Remember that <code>&lt;md&gt;&lt;/md&gt;</code> is where the markdown
+      gets inserted.
+    </p>
+    <p>
+      Finally, make a test file, named <code>index.md</code>, at the root in the
+      same repo, and put whatever markdown you want in there.
+    </p>
+    <p>Good luck I guess.</p>
+  </body>
+</html>
