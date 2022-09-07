@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>greysoh's blog full of lulz</title>
+
+    <link rel="stylesheet" href="/static/highlighting.css" />
+    <link rel="stylesheet" href="/static/fira/fira_code.css" />
+
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+  <body>
+    <div class="titlebar">
+      <a class="name" href="/">greysoh</a>
+
+      <div class="menuopts">
+        <a class="menuopt" href="/tech/toc.html">tech/</a>
+        <a class="menuopt" href="/rand/toc.html">rand/</a>
+      </div>
+    </div>
+
+    <br />
+
+    <h1>The road to a (better) Window Server [9/6/22]</h1>
+    <h2>Info</h2>
+    <p>
+      This article is not very technical, I just want to show off mostly. I'll
+      make a more technical version once I get my WindowServer in a better
+      shape.
+    </p>
+    <h2>Intro</h2>
+    <p>
+      I've been working on my
+      <a href="https://eclipse.greysoh.xyz">operating system</a> (<a
+        href="https://github.com/Eclipse-JS/eclipse"
+        >source code</a
+      >) for about 2 weeks now (after being rewritten from my old project,
+      JSKernel, and I wanna share how I got to a basic window server from a bad
+      OS I made.
+    </p>
+    <h2>Nuking</h2>
+    <p>
+      I decided to nuke the old version 2 weeks ago, and make my own. I already
+      had the basics down, such as processes (actually, that's the only thing I
+      already had planned).
+    </p>
+    <p>
+      I decided to go for the Microkernel architecture (nearly everything runs
+      in userspace, except fetching the framebuffer, and running executables),
+      which fit JS well and I thought it was simple.
+    </p>
+    <h2>Planning</h2>
+    <p>
+      Everything I write in my code is planned (architecture wise) ahead of
+      time. From the filesystem (took me 4 main revisions to get right, and 4
+      more on top of that to add security), to the shell.
+    </p>
+    <h2>Kernel</h2>
+    <p>
+      The kernel is very simple. Just executes code and has a framebuffer.
+      That's it.
+    </p>
+    <p>
+      Oh, did I mention it has a JavaScript <code>require()</code> like system
+      built in? (Not to be confused with <code>qb.require()</code> and
+      <code>require()</code> in the code)
+    </p>
+    <p>
+      Yeah, my code has Kernel extensions, for libraries. Nearly everything
+      needs it. From the filesystem, to the security and eventually the Window
+      Server.
+    </p>
+    <h2>VFS</h2>
+    <p>
+      The filesystem is incredibly simple. I tried making something efficient
+      but failed miserably. So, I decided to just push all the directories and
+      files into one directory. (I don't know how I've lived this long without
+      rm support :p)
+    </p>
+    <h2>Security</h2>
+    <p>
+      Security was a tough one. I had made a users parser in userspace, which
+      meant security had to be done in userspace, which was incredibly
+      difficult.
+    </p>
+    <p>
+      I added custom kernels per app in my code, which is only used in security,
+      and is disabled after that. The security system just fetches the user info
+      and if you have the right permissions, you can essentially be god (besides
+      some features).
+    </p>
+    <p>
+      For example, you do not have access to <code>localStorage</code>,
+      <code>document</code>, <code>self</code>, or others, and have to use
+      abstraction layers to access the data.
+    </p>
+    <p>
+      But, if you are root, you do not need abstraction layers, and can
+      interface directly (abstractions are still encouraged, however).
+    </p>
+    <p>
+      After a night of hard work, I finally had support for security. But there
+      was 1 small problem.
+    </p>
+    <h2>
+      Migration to <a href="https://github.com/Eclipse-JS/qbuild">qbuild</a>
+    </h2>
+    <p>Code got long. And I mean LONG. For example:</p>
+    <p><code>(was) /repos/main/pkg.js</code></p>
+    <pre><code class="hljs"><span class="hljs-number">216</span>  <span class="hljs-attr">default</span>: {
+<span class="hljs-number">217</span>    input.<span class="hljs-title function_">stdout</span>(<span class="hljs-string">&quot;ERR: No commands specified!\n\n&quot;</span>);
+<span class="hljs-number">218</span>    <span class="hljs-title function_">help</span>();
+<span class="hljs-number">219</span>    
+<span class="hljs-number">220</span>    <span class="hljs-keyword">break</span>;
+<span class="hljs-number">221</span>  }
+<span class="hljs-number">222</span> }
+</code></pre>
+    <p>
+      I caved in, and made a custom build system. Now, everything is split into
+      small(ish) chunks. Not really much to talk about, except boring work.
+    </p>
+    <h2>Misc stuff</h2>
+    <p>
+      I was thinking about copy.sh's v86 project, and DOOM, but decided that a:
+      it may be out of my league yet, and b: it would probably work better if I
+      implement my Window Server first.
+    </p>
+    <h2>WindowServer</h2>
+    <p>Alright, here goes.</p>
+    <p>
+      The Window Server has a simple architecture, and I'm only expecting it to
+      be around ~400 lines of code, <strong>MAX</strong>. It has to run as root
+      (because Security requires it to be able to register Kernel extensions,
+      kinda like JS libraries).
+    </p>
+    <p>
+      I found out this wonderful feature (no, seriously!), in that you could
+      have nested canvases, by using drawImage to draw it onto the screen.
+    </p>
+    <p>
+      Immediately, I started work on the Window Server, and you could even see
+      my
+      <a href="https://github.com/Eclipse-JS/eclipse/issues/4"
+        >architecture plans</a
+      >
+      (probably a bit different than what I implemented, as I didn't read it,
+      oops!)
+    </p>
+    <p>
+      It works exactly like stated (so far), so I really don't have anything to
+      say, other then the fact that the canvas system works(!)
+    </p>
+    <h2>Conclusion</h2>
+    <p>
+      I would appreciate some pull requests to fix the good amount of FIXME's
+      and TODO's in the code. And the Window Server is almost ready for prime
+      time.
+    </p>
+    <p>
+      I still need to implement drawing on the top, moving windows, and keyboard
+      and mouse handling.
+    </p>
+    <p>But other than that, happy Tuesday! (or whatever day it is, lol)</p>
+  </body>
+</html>
